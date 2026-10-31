@@ -37,26 +37,49 @@ def parse_search_results(html: str) -> List[dict]:
     return items
 
 
+PRICE_SELECTORS = (
+    "#corePrice_feature_div .priceToPay .a-offscreen",
+    "#corePrice_feature_div span.a-price:not(.a-text-price) .a-offscreen",
+    ".priceToPay .a-offscreen",
+    "span.a-price:not(.a-text-price) .a-offscreen",
+)
+MRP_SELECTORS = (
+    "span.a-text-price .a-offscreen",
+    "[data-a-strike='true'] .a-offscreen",
+    "[data-a-strike='true']",
+)
+SELLER_SELECTORS = (
+    "#sellerProfileTriggerId",
+    "#merchant-info a",
+    "[data-feature-name='desktop_merchant_info']",
+)
+STOCK_SELECTORS = ("#availability span", "[data-feature-name='availability']")
+
+
+def _first_text(soup, selectors) -> str:
+    for selector in selectors:
+        text = _text(soup.select_one(selector))
+        if text:
+            return text
+    return ""
+
+
 def parse_product_page(html: str) -> dict:
     soup = BeautifulSoup(html, "lxml")
     title = _text(soup.select_one("#productTitle"))
-    mrp_text = _text(soup.find(attrs={"data-a-strike": "true"}))
-    price_candidate = (
-        soup.find(id="corePrice_feature_div")
-        or soup.find(id="corePrice_desktop")
-        or soup.find(id="corePriceDisplay_desktop_feature_div")
-    )
-    price_text = _text(
-        price_candidate.find(attrs={"aria-hidden": "true"}) if price_candidate else None
-    ) or _text(soup.find(attrs={"data-a-color": "price"}))
-    buy_box_seller = _text(
-        soup.select_one("#sellerProfileTriggerId")
-        or soup.find(attrs={"data-feature-name": "desktop_merchant_info"})
-    )
-    stock_status = _text(
-        soup.select_one("#availability span")
-        or soup.find(attrs={"data-feature-name": "availability"})
-    )
+    mrp_text = _first_text(soup, MRP_SELECTORS)
+    price_text = _first_text(soup, PRICE_SELECTORS)
+    if not price_text:  # older layouts
+        container = (
+            soup.find(id="corePrice_feature_div")
+            or soup.find(id="corePrice_desktop")
+            or soup.find(id="corePriceDisplay_desktop_feature_div")
+        )
+        price_text = _text(container.find(attrs={"aria-hidden": "true"}) if container else None) or _text(
+            soup.find(attrs={"data-a-color": "price"})
+        )
+    buy_box_seller = _first_text(soup, SELLER_SELECTORS)
+    stock_status = _first_text(soup, STOCK_SELECTORS)
     return {
         "title": title,
         "mrp": normalize_price(mrp_text),

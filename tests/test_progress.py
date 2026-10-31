@@ -97,3 +97,17 @@ async def test_task_status_endpoint_merges_celery_and_progress(client, monkeypat
 
     monkeypatch.setattr(crawl_routes, "_celery_state", broken)
     assert (await client.get("/api/crawl/tasks/abc", headers=AUTH)).status_code == 503
+
+
+def test_summarize_crawl_reports_counts_and_flags_empty_results():
+    from scheduler.tasks import summarize_crawl
+
+    good = "'response_received_count': 10,\n 'item_scraped_count': 9,\n 'item_dropped_count': 1,"
+    assert summarize_crawl(good) == ("Fetched 10 page(s), saved 9 item(s), dropped 1.", False)
+
+    bad = "WARNING Dropped: No price parsed for B0X\n'response_received_count': 4,\n'item_dropped_count': 4,"
+    summary, saved_nothing = summarize_crawl(bad)
+    assert saved_nothing is True
+    assert "saved 0 item(s)" in summary and "No price parsed for B0X" in summary
+
+    assert summarize_crawl("")[1] is False  # no pages fetched is not the same as 'pages but nothing saved'

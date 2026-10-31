@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import uuid
@@ -26,6 +27,23 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _stat(name: str, output: str) -> int:
+    match = re.search(rf"'{name}': (\d+)", output)
+    return int(match.group(1)) if match else 0
+
+
+def summarize_crawl(output: str) -> tuple[str, bool]:
+    """Turn Scrapy's final stats into a one-line summary and a 'saved nothing' flag."""
+    pages = _stat("response_received_count", output)
+    saved = _stat("item_scraped_count", output)
+    dropped = _stat("item_dropped_count", output)
+    summary = f"Fetched {pages} page(s), saved {saved} item(s), dropped {dropped}."
+    reasons = list(dict.fromkeys(re.findall(r"Dropped: (.+)", output)))[:2]
+    if reasons:
+        summary += " Reasons: " + "; ".join(reason[:120] for reason in reasons)
+    return summary, pages > 0 and saved == 0
+
+
 def _run_scrapy(spider_name: str, *extra_args: str, task_id: str | None = None) -> str:
     command = [sys.executable, "-m", "scrapy", "crawl", spider_name, *extra_args]
     # CRAWL_TASK_ID switches on the progress extension (scraper/extensions.py).
@@ -35,7 +53,15 @@ def _run_scrapy(spider_name: str, *extra_args: str, task_id: str | None = None) 
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr[-4000:] or result.stdout[-4000:])
-    return result.stdout[-4000:]
+    # Scrapy writes its log and final stats to stderr.
+    summary, saved_nothing = summarize_crawl(result.stderr + result.stdout)
+    logger.info("%s finished: %s", spider_name, summary)
+    if saved_nothing:
+        raise RuntimeError(
+            f"{summary} Pages came back but nothing was saved: they were probably bot-check pages "
+            "or the page layout changed. Check the worker log."
+        )
+    return summary
 
 
 @celery_app.task(name="scheduler.tasks.run_search_crawl", bind=True)

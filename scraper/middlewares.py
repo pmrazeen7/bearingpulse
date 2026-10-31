@@ -36,20 +36,41 @@ class RandomUserAgentMiddleware:
 
 
 class ProxyRotationMiddleware:
+    crawler = None
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        instance = cls()
+        instance.crawler = crawler
+        return instance
+
+    def _spider_name(self, spider):
+        return _name(spider) or _name(getattr(self.crawler, "spider", None))
+
     def process_request(self, request: Request, spider=None):
         proxy = proxy_manager.get_proxy(request.url, request.meta.get("retry_times", 0))
         if proxy:
             request.meta["proxy"] = proxy
             request.meta["proxy_key"] = proxy
         _write_json_log(
-            {"event": "scrape_attempt", "url": request.url, "proxy": redact_proxy(proxy), "spider": _name(spider)}
+            {
+                "event": "scrape_attempt",
+                "url": request.url,
+                "proxy": redact_proxy(proxy),
+                "spider": self._spider_name(spider),
+            }
         )
 
     def process_response(self, request: Request, response, spider=None):
         if response.status < 400:
             proxy_manager.record_success(request.meta.get("proxy_key"))
             _write_json_log(
-                {"event": "scrape_success", "url": request.url, "status": response.status, "spider": _name(spider)}
+                {
+                    "event": "scrape_success",
+                    "url": request.url,
+                    "status": response.status,
+                    "spider": self._spider_name(spider),
+                }
             )
         return response
 
@@ -57,7 +78,12 @@ class ProxyRotationMiddleware:
         proxy_manager.record_failure(request.meta.get("proxy_key"))
         proxy_manager.retire_unhealthy()
         _write_json_log(
-            {"event": "scrape_failure", "url": request.url, "error": str(exception), "spider": _name(spider)}
+            {
+                "event": "scrape_failure",
+                "url": request.url,
+                "error": str(exception),
+                "spider": self._spider_name(spider),
+            }
         )
 
 

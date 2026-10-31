@@ -10,15 +10,21 @@ class StockStatus(StrEnum):
     OUT_OF_STOCK = "out_of_stock"
 
 
+_NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
+
+
 def normalize_price(value: str | float | int | None) -> float | None:
+    """Return the first number in ``value``, or None when there is none.
+
+    Amazon renders prices as text like ``₹1,999.00``, ``₹ 839`` or, for a struck-through
+    MRP, the same figure twice (``₹1,999 ₹1,999``), so a plain ``float(...)`` is not safe.
+    """
     if value is None:
         return None
     if isinstance(value, (float, int)):
         return float(value)
-    cleaned = value.replace("₹", "").replace(",", "").strip()
-    if not cleaned:
-        return None
-    return float(cleaned)
+    match = _NUMBER.search(value)
+    return float(match.group().replace(",", "")) if match else None
 
 
 def normalize_seller_name(name: str | None) -> str:
