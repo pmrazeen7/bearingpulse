@@ -118,3 +118,28 @@ def test_empty_or_bot_check_page_yields_no_price_instead_of_raising():
     product = parse_product_page("<html><title>Sorry</title><p>Enter the characters you see</p></html>")
     assert product["current_price"] is None
     assert product["is_js_heavy"] is True
+
+
+# Trimmed from a real amazon.in search page: result cards carry nested data-asin nodes, and one
+# layout keeps only the brand in the first h2 span with the product name in `a > h2`.
+REAL_SEARCH_HTML = """
+<div data-asin="B01N9I07UE" data-component-type="s-search-result">
+  <div data-asin="B01N9I07UE"><h2 class="brand"><span>SKF</span></h2></div>
+  <a href="/dp/B01N9I07UE"><h2><span>6205-2Z/C3 Same Day Shipping - Factory New!</span></h2></a>
+  <span class="a-price"><span class="a-offscreen">₹4,132</span></span>
+</div>
+<div data-asin="B0HLPVNKRQ" data-component-type="s-search-result">
+  <h2 aria-label="6205 2RS Ball Bearings, Pack of 2"><span>6205 2RS Ball Bearings, Pack of 2</span></h2>
+  <span class="a-price"><span class="a-offscreen">₹350</span></span>
+</div>
+<div data-asin="" data-component-type="s-search-result"><h2><span>Ad slot</span></h2></div>
+"""
+
+
+def test_parse_search_results_reads_current_markup_without_duplicates():
+    results = parse_search_results(REAL_SEARCH_HTML)
+    assert [item["asin"] for item in results] == ["B01N9I07UE", "B0HLPVNKRQ"]
+    assert results[0]["title"] == "6205-2Z/C3 Same Day Shipping - Factory New!"  # not just the brand "SKF"
+    assert results[0]["price"] == 4132.0
+    assert results[1]["title"] == "6205 2RS Ball Bearings, Pack of 2"
+    assert results[1]["price"] == 350.0

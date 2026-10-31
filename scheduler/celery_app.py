@@ -29,10 +29,9 @@ celery_app.conf.update(
             "task": "scheduler.tasks.run_asin_detail_crawl",
             "schedule": crontab(minute=0, hour="*/2"),
         },
-        "run-seller-offer-crawl": {
-            "task": "scheduler.tasks.run_seller_offer_crawl",
-            "schedule": crontab(minute="*/30"),
-        },
+        # The seller-offer sweep is not scheduled: Amazon retired /gp/offer-listing/ (it now redirects to
+        # an empty stub) and the "other sellers" panel is loaded dynamically, so the job cannot find
+        # offers yet. It stays available on demand; re-enable it once it has a working data source.
         "run-alert-check": {
             "task": "scheduler.tasks.run_alert_check",
             "schedule": crontab(minute="*/15"),

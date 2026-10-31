@@ -19,8 +19,8 @@ backed by a FastAPI service.
   products, persisted alert configuration, CSV export, task-queue triggers, health endpoint.
 - **Crawling** — Scrapy spiders (search, product detail, seller offers), Playwright fallback for JS-heavy pages, user-agent
   and proxy rotation (ScrapeOps or your own list), PIN-code simulation, blocked-response retry.
-- **Scheduling** — Celery + Redis beat schedule (search every 6h, product refresh every 2h, seller sweep every 30 min,
-  alert check every 15 min). Alerts can be emailed (SMTP) or posted to a webhook.
+- **Scheduling** — Celery + Redis beat schedule (search every 6h, product refresh every 2h, alert check every 15 min).
+  The seller-offer sweep is on-demand only: see Known limitations. Alerts can be emailed (SMTP) or posted to a webhook.
 - **Legacy Streamlit dashboard** — retained under `dashboard/` (optional; see notes).
 
 ## Architecture
@@ -179,6 +179,11 @@ npm run build               # production bundle
 - **Change alert sensitivity:** *Settings → Alert thresholds* (default or per-ASIN).
 
 ## Known limitations
+
+- **Seller offers (all sellers per product) are not collected yet.** Amazon retired the offer-listing page this
+  job reads and now loads "Other sellers" dynamically, and many bearing listings have a single seller anyway. The
+  product refresh still records the Buy Box seller, price, MRP and stock on every run, which drives the Buy Box and
+  price-drop alerts. For complete offer data consider Amazon's Product Advertising API or a headless-browser job.
 
 - Amazon markup changes frequently; parsers in `data_pipeline/parser.py` use selectors that may need maintenance, and
   real crawls were **not** executed in development (no proxy credentials / network scraping in CI).

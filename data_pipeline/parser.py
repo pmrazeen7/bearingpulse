@@ -11,25 +11,59 @@ def _text(element) -> str:
     return element.get_text(" ", strip=True) if element else ""
 
 
+SEARCH_PRICE_SELECTORS = (
+    "span.a-price:not(.a-text-price) .a-offscreen",
+    "[data-cy='price-recipe']",
+)
+
+
+def _search_title(card) -> str:
+    """Product name from a search card.
+
+    Current markup keeps the brand in one <h2> span and the name in ``a > h2``; some cards put the
+    full name in the h2's aria-label. Take the first non-empty of those, then fall back to older
+    markup and finally the product image's alt text.
+    """
+    for heading in card.select("h2"):
+        label = (heading.get("aria-label") or "").strip()
+        if label:
+            return label
+    for selector in ("a h2 span", "h2 a span", "h2 span"):
+        text = _text(card.select_one(selector))
+        if text:
+            return text
+    image = card.select_one("img.s-image")
+    return (image.get("alt") or "").strip() if image else ""
+
+
 def parse_search_results(html: str) -> List[dict]:
     soup = BeautifulSoup(html, "lxml")
+    # One element per result. Nested nodes also carry data-asin, so fall back to the broad
+    # selector only when the page has no result cards at all (older/test markup).
+    cards = soup.select("div[data-component-type='s-search-result']") or soup.select("[data-asin]")
     items: List[dict] = []
-    for card in soup.select("[data-asin]"):
-        asin = (card.get("data-asin") or "").strip()
-        if len(asin) != 10:
+    seen: set[str] = set()
+    for card in cards:
+        asin = (card.get("data-asin") or "").strip().upper()
+        if len(asin) != 10 or asin in seen:
             continue
-        title_el = card.select_one("h2 a span") or card.select_one("h2 span")
-        price_container = card.select_one("[data-cy='price-recipe']") or card.find(
-            attrs={"aria-label": lambda value: isinstance(value, str) and "₹" in value}
-        )
+        seen.add(asin)
+        price_el = None
+        for selector in SEARCH_PRICE_SELECTORS:
+            price_el = card.select_one(selector)
+            if price_el:
+                break
         combined_price = ""
-        if price_container:
-            combined_price = price_container.get("aria-label", "") or _text(price_container)
+        if price_el:
+            combined_price = _text(price_el) or price_el.get("aria-label", "")
+        if not combined_price:  # older markup: price in an aria-label
+            labelled = card.find(attrs={"aria-label": lambda value: isinstance(value, str) and "₹" in value})
+            combined_price = (labelled.get("aria-label", "") or _text(labelled)) if labelled else ""
         seller_hint = _text(card.find(attrs={"data-csa-c-delivery-price": True}))
         items.append(
             {
-                "asin": asin.upper(),
-                "title": _text(title_el),
+                "asin": asin,
+                "title": _search_title(card),
                 "price": normalize_price(combined_price),
                 "seller_hint": seller_hint,
             }
