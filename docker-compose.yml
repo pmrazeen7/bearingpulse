@@ -44,7 +44,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
 
   frontend:
     build:
@@ -52,7 +52,7 @@ services:
     depends_on:
       - app
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     restart: unless-stopped
 
   celery-worker:
@@ -87,7 +87,7 @@ services:
     depends_on:
       - app
     ports:
-      - "8501:8501"
+      - "${STREAMLIT_PORT:-8501}:8501"
 
 volumes:
   postgres_data:
