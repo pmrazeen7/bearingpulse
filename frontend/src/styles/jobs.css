@@ -21,6 +21,11 @@
   box-shadow: none;
 }
 
+.progress-stalled > span {
+  background: var(--warning);
+  box-shadow: none;
+}
+
 .progress-failed > span {
   background: var(--danger);
   box-shadow: none;
@@ -99,6 +104,15 @@
 
 .job-ok {
   color: var(--success);
+}
+
+.job-warn {
+  color: var(--warning);
+}
+
+.job-warning {
+  color: var(--warning);
+  font-size: 12px;
 }
 
 .job-bad {

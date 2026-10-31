@@ -4,7 +4,18 @@ import { AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { formatNumber } from "../lib/format";
 import { useJobs } from "../lib/jobs";
 
-const LABELS = { queued: "Queued — waiting for a worker", running: "Running", success: "Finished", failed: "Failed" };
+const LABELS = {
+  queued: "Queued — waiting for a worker",
+  running: "Running",
+  stalled: "Stalled",
+  success: "Finished",
+  failed: "Failed",
+};
+
+function idleText(seconds) {
+  if (!seconds) return "";
+  return seconds >= 120 ? `${Math.round(seconds / 60)} min` : `${seconds}s`;
+}
 
 function Progress({ job }) {
   const indeterminate = (job.status === "queued" || job.status === "running") && job.percent === null;
@@ -36,6 +47,7 @@ export default function JobTray() {
               <span className="job-title">
                 {job.status === "success" && <CheckCircle2 size={15} className="job-ok" aria-hidden="true" />}
                 {job.status === "failed" && <AlertTriangle size={15} className="job-bad" aria-hidden="true" />}
+                {job.status === "stalled" && <AlertTriangle size={15} className="job-warn" aria-hidden="true" />}
                 {job.label}
               </span>
               <span className="job-percent num">
@@ -56,6 +68,12 @@ export default function JobTray() {
               {job.items > 0 && <span className="num">{formatNumber(job.items)} saved</span>}
             </footer>
             {job.status === "failed" && job.error && <p className="job-error">{job.error.split("\n").pop()}</p>}
+            {job.status === "stalled" && (
+              <p className="job-warning">
+                No progress for {idleText(job.idle)}. The worker was probably restarted while this ran. Dismiss it and run the job
+                again; items already saved are kept.
+              </p>
+            )}
           </section>
         );
       })}

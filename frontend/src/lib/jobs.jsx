@@ -8,7 +8,8 @@ import { invalidate, refreshAll } from "./useApi";
 const STORAGE_KEY = "bp.jobs";
 const POLL_MS = 2000;
 const CLEAR_AFTER_MS = 20000;
-const ACTIVE = new Set(["queued", "running"]);
+// "stalled" jobs are still polled: a slow crawl can recover, and a dead one stays dismissable.
+const ACTIVE = new Set(["queued", "running", "stalled"]);
 
 function load() {
   try {
@@ -74,8 +75,8 @@ export function JobsProvider({ children }) {
           const update = updates.find((item) => item.taskId === job.taskId);
           if (!update) return job;
           if (update.stale) return { ...job, stale: true };
-          const { status, percent, done, total, items, error, summary } = update.data;
-          return { ...job, status, percent, done, total, items, error, summary, stale: false };
+          const { status, percent, done, total, items, error, summary, idle_seconds: idle } = update.data;
+          return { ...job, status, percent, done, total, items, error, summary, idle, stale: false };
         }),
       );
       updates.forEach(({ taskId, data }) => {

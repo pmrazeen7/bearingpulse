@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, status
@@ -16,6 +17,9 @@ JOBS = {
     "seller-offers": "scheduler.tasks.run_seller_offer_crawl",
     "alert-check": "scheduler.tasks.run_alert_check",
 }
+# No progress update for this long while "running" means the worker or crawler is gone
+# (for example the container was restarted mid-crawl). Requests are seconds apart, so this is generous.
+STALL_AFTER_SECONDS = 300
 QUEUE_DOWN = "Task queue (Redis/Celery) is unavailable. Start Redis and a Celery worker, then retry."
 Job = Literal["search", "asin-detail", "seller-offers", "alert-check"]
 
@@ -38,7 +42,7 @@ def _celery_state(task_id: str) -> dict:
     return payload
 
 
-def summarize(celery: dict, progress: dict) -> dict:
+def summarize(celery: dict, progress: dict, now: float | None = None) -> dict:
     """Combine Celery's task state with the crawler's live counters into one payload."""
     state = celery["state"]
     done, total = int(progress.get("done", 0)), int(progress.get("total", 0))
@@ -57,8 +61,15 @@ def summarize(celery: dict, progress: dict) -> dict:
         "REVOKED": "failed",
         "PENDING": "queued",
     }.get(state, "running")
+    idle = None
+    updated = int(progress.get("updated", 0) or 0)
+    if status == "running" and updated:
+        idle = max(0, int((now if now is not None else time.time()) - updated))
+        if idle > STALL_AFTER_SECONDS:
+            status = "stalled"
     return {
         "status": status,
+        "idle_seconds": idle,
         "celery_state": state,
         "percent": percent,
         "done": min(done, total) if total else done,

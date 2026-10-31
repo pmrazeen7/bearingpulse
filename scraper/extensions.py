@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 
 import redis
 from scrapy import signals
@@ -29,7 +30,7 @@ class ProgressExtension:
     def __init__(self, task_id: str, client) -> None:
         self.key = progress_key(task_id)
         self.client = client
-        self.state = {"done": 0, "items": 0, "total": 0, "finished": 0}
+        self.state = {"done": 0, "items": 0, "total": 0, "finished": 0, "updated": 0}
         self._warned = False
 
     @classmethod
@@ -48,6 +49,7 @@ class ProgressExtension:
         return extension
 
     def _publish(self) -> None:
+        self.state["updated"] = int(time.time())  # lets the API detect a crawl that silently died
         try:
             self.client.hset(self.key, mapping=self.state)
             self.client.expire(self.key, PROGRESS_TTL_SECONDS)

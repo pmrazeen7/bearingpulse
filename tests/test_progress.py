@@ -45,7 +45,8 @@ def test_extension_publishes_counters_to_redis():
     ext.response_received(None, None, None)
     ext.spider_closed(None, "finished")
     data = fake.hashes[progress_key("task-1")]
-    assert data == {"done": "2", "items": "1", "total": "3", "finished": "1"}
+    assert {k: v for k, v in data.items() if k != "updated"} == {"done": "2", "items": "1", "total": "3", "finished": "1"}
+    assert int(data["updated"]) > 0
     assert fake.ttl[progress_key("task-1")] > 0
 
 
@@ -89,7 +90,7 @@ async def test_task_status_endpoint_merges_celery_and_progress(client, monkeypat
     assert response.status_code == 200
     assert response.json() == {
         "task_id": "abc", "status": "running", "celery_state": "STARTED",
-        "percent": 50, "done": 5, "total": 10, "items": 2,
+        "percent": 50, "done": 5, "total": 10, "items": 2, "idle_seconds": None,
     }
 
     def broken(_id):
@@ -111,3 +112,14 @@ def test_summarize_crawl_reports_counts_and_flags_empty_results():
     assert "saved 0 item(s)" in summary and "No price parsed for B0X" in summary
 
     assert summarize_crawl("")[1] is False  # no pages fetched is not the same as 'pages but nothing saved'
+
+
+def test_running_job_with_no_recent_progress_is_reported_as_stalled():
+    progress = {"done": "47", "total": "83", "items": "45", "updated": "1000"}
+    fresh = summarize({"state": "STARTED"}, progress, now=1100)
+    assert (fresh["status"], fresh["idle_seconds"]) == ("running", 100)
+    stalled = summarize({"state": "STARTED"}, progress, now=1000 + 301)
+    assert stalled["status"] == "stalled" and stalled["idle_seconds"] == 301
+    assert stalled["percent"] == 56  # keeps the last known progress so the card still makes sense
+    # A finished job is never reported as stalled, however old its last update is.
+    assert summarize({"state": "SUCCESS"}, progress, now=99999)["status"] == "success"

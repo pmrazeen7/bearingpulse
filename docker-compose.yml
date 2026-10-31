@@ -58,6 +58,8 @@ services:
   celery-worker:
     <<: *app
     command: celery -A scheduler.celery_app worker --loglevel=info
+    # Warm shutdown: on stop/rebuild, give a running crawl time to finish instead of killing it.
+    stop_grace_period: 5m
     depends_on:
       app:
         condition: service_started
