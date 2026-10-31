@@ -26,5 +26,6 @@ DOWNLOADER_MIDDLEWARES = {
     "scraper.middlewares.ProxyRotationMiddleware": 410,
     "scraper.middlewares.BlockedResponseRetryMiddleware": 550,
 }
+EXTENSIONS = {"scraper.extensions.ProgressExtension": 500}
 HTTPCACHE_ENABLED = False
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"

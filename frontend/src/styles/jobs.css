@@ -1,0 +1,129 @@
+/* Progress bars and the background-job tray */
+.progress {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width 600ms var(--ease-out);
+}
+
+.progress-success > span {
+  background: var(--success);
+  box-shadow: none;
+}
+
+.progress-failed > span {
+  background: var(--danger);
+  box-shadow: none;
+}
+
+.progress.is-indeterminate > span {
+  width: 35%;
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+.job-tray {
+  position: fixed;
+  left: calc(var(--sidebar-w) + 16px);
+  bottom: 16px;
+  z-index: 70;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.is-collapsed .job-tray {
+  left: calc(var(--sidebar-w-collapsed) + 16px);
+}
+
+.job-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 380ms var(--ease-spring) both;
+}
+
+.job-card header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.job-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.job-percent {
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.job-close {
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+}
+
+.job-close:hover {
+  color: var(--text);
+}
+
+.job-ok {
+  color: var(--success);
+}
+
+.job-bad {
+  color: var(--danger);
+}
+
+.job-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.job-error {
+  color: var(--danger);
+  font-size: 12px;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .job-tray,
+  .is-collapsed .job-tray {
+    left: 16px;
+    bottom: 16px;
+  }
+}

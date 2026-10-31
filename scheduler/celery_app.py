@@ -14,6 +14,7 @@ celery_app.conf.update(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
+    task_track_started=True,
     result_expires=60 * 60 * 24,
     broker_connection_retry_on_startup=True,
     # Keep API-side enqueues from hanging when Redis is down.

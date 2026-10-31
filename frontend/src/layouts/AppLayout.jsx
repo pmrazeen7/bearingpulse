@@ -25,6 +25,8 @@ import { useToast } from "../components/Toast";
 import { Button, Skeleton } from "../components/ui";
 import { api, DOCS_URL } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useJobs } from "../lib/jobs";
+import JobTray from "../components/JobTray";
 import { formatDateTime } from "../lib/format";
 import { useTheme } from "../lib/theme";
 import { useApi } from "../lib/useApi";
@@ -83,6 +85,7 @@ function HealthIndicator() {
 
 export function useCrawl() {
   const toast = useToast();
+  const { startJob } = useJobs();
   return async (job) => {
     const meta = CRAWL_JOBS.find((item) => item.job === job);
     try {
@@ -92,7 +95,8 @@ export function useCrawl() {
         return result;
       }
       const result = await api.post(`/crawl/${job}`);
-      toast.success(`${meta.label} queued`, `Task ${result.task_id.slice(0, 8)} sent to the Celery worker.`);
+      startJob({ taskId: result.task_id, job, label: meta.label });
+      toast.info(`${meta.label} queued`, "Track its progress in the panel at the bottom of the page.");
       return result;
     } catch (error) {
       toast.error(`Could not start "${meta.label}"`, error.message);
@@ -269,6 +273,7 @@ export default function AppLayout() {
           </div>
         </main>
       </div>
+      <JobTray />
     </div>
   );
 }

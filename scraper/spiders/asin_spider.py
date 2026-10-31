@@ -14,6 +14,7 @@ class AsinSpider(scrapy.Spider):
     def __init__(self, asins: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.asins = [asin.strip().upper() for asin in asins.split(",") if asin.strip()]
+        self.expected_total = len(self.asins)
 
     async def start(self):
         for asin in self.asins:

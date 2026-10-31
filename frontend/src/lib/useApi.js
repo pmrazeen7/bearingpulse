@@ -12,6 +12,13 @@ export function invalidate(prefix = "") {
   }
 }
 
+const REFRESH_EVENT = "bp:refresh";
+
+// Ask every mounted useApi hook to reload (used when a background job finishes).
+export function refreshAll() {
+  window.dispatchEvent(new Event(REFRESH_EVENT));
+}
+
 export function useApi(path, params, { enabled = true } = {}) {
   const key = path ? `${path}?${JSON.stringify(params || {})}` : null;
   const cached = key ? cache.get(key) : undefined;
@@ -51,6 +58,11 @@ export function useApi(path, params, { enabled = true } = {}) {
   }, [key, path, enabled, nonce]);
 
   const reload = useCallback(() => setNonce((value) => value + 1), []);
+
+  useEffect(() => {
+    window.addEventListener(REFRESH_EVENT, reload);
+    return () => window.removeEventListener(REFRESH_EVENT, reload);
+  }, [reload]);
 
   return { ...state, reload, initialLoading: state.loading && state.data === undefined };
 }

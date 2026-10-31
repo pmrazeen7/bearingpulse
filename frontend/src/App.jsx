@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import { ToastProvider } from "./components/Toast";
 import AppLayout, { PageFallback } from "./layouts/AppLayout";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { JobsProvider } from "./lib/jobs";
 import { useTheme } from "./lib/theme";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -39,6 +40,7 @@ export default function App() {
       <ThemeRoot>
         <ToastProvider>
           <AuthProvider>
+            <JobsProvider>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
@@ -69,6 +71,7 @@ export default function App() {
                 }
               />
             </Routes>
+            </JobsProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeRoot>

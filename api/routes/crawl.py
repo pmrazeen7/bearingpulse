@@ -26,14 +26,46 @@ def _send(task_name: str) -> str:
     return celery_app.send_task(task_name, retry=False).id
 
 
-def _state(task_id: str) -> dict:
+def _celery_state(task_id: str) -> dict:
     from scheduler.celery_app import celery_app
 
     result = celery_app.AsyncResult(task_id)
-    payload = {"task_id": task_id, "state": result.state}
+    payload = {"state": result.state}
     if result.failed():
-        payload["error"] = str(result.result)
+        payload["error"] = str(result.result)[-600:]
+    elif result.successful() and isinstance(result.result, str):
+        payload["summary"] = result.result[-300:]
     return payload
+
+
+def summarize(celery: dict, progress: dict) -> dict:
+    """Combine Celery's task state with the crawler's live counters into one payload."""
+    state = celery["state"]
+    done, total = int(progress.get("done", 0)), int(progress.get("total", 0))
+    items = int(progress.get("items", 0))
+    if state == "PENDING" and done > 0:
+        state = "STARTED"  # live counters prove it is running even if Celery has not recorded the start
+    if state == "SUCCESS":
+        percent: int | None = 100
+    elif state in {"STARTED", "PROGRESS", "RETRY"} and total > 0:
+        percent = min(99, int(done * 100 / total))
+    else:
+        percent = None  # queued, or running without a known total: show an indeterminate bar
+    status = {
+        "SUCCESS": "success",
+        "FAILURE": "failed",
+        "REVOKED": "failed",
+        "PENDING": "queued",
+    }.get(state, "running")
+    return {
+        "status": status,
+        "celery_state": state,
+        "percent": percent,
+        "done": min(done, total) if total else done,
+        "total": total or None,
+        "items": items,
+        **{key: celery[key] for key in ("error", "summary") if key in celery},
+    }
 
 
 @router.get("/jobs")
@@ -59,8 +91,10 @@ async def trigger_job(job: Job, request: Request):
 
 
 @router.get("/tasks/{task_id}")
-async def task_status(task_id: str):
+async def task_status(task_id: str, request: Request):
     try:
-        return await run_in_threadpool(_state, task_id)
+        celery = await run_in_threadpool(_celery_state, task_id)
+        progress = await request.app.state.redis.hgetall(f"crawl:progress:{task_id}")
     except Exception as exc:
         raise HTTPException(status_code=503, detail="Task result backend is unavailable") from exc
+    return {"task_id": task_id, **summarize(celery, progress or {})}
