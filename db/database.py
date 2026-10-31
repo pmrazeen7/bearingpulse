@@ -28,8 +28,15 @@ def normalize_async_url(url: str) -> str:
 
 
 def normalize_sync_url(url: str) -> str:
-    """Return a driver URL usable by synchronous tooling such as Alembic."""
-    return url.replace("+asyncpg", "").replace("+aiosqlite", "")
+    """Return a driver URL usable by synchronous tooling such as Alembic.
+
+    SQLAlchemy 2.1 maps a bare ``postgresql://`` to psycopg v3, but this project
+    installs psycopg2, so name the driver explicitly.
+    """
+    url = url.replace("+asyncpg", "").replace("+aiosqlite", "")
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return url
 
 
 # Kept for backwards compatibility with earlier imports.

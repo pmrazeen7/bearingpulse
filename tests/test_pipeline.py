@@ -22,6 +22,16 @@ def test_proxy_manager_retires_unhealthy_proxies():
     assert manager.get_proxy() == "http://b:2"
 
 
+def test_database_url_normalisation():
+    from db.database import normalize_async_url, normalize_sync_url
+
+    url = "postgresql://u:p@postgres:5432/db"
+    assert normalize_async_url(url) == "postgresql+asyncpg://u:p@postgres:5432/db"
+    assert normalize_sync_url(url) == "postgresql+psycopg2://u:p@postgres:5432/db"
+    assert normalize_sync_url("postgresql+asyncpg://u:p@h/db") == "postgresql+psycopg2://u:p@h/db"
+    assert normalize_sync_url("sqlite+aiosqlite:///x.db") == "sqlite:///x.db"
+
+
 def test_settings_parse_comma_separated_lists():
     settings = Settings(cors_origins="http://a.test, http://b.test", search_queries="SKF 6205,SKF 6206", _env_file=None)
     assert settings.cors_origins == ["http://a.test", "http://b.test"]
