@@ -165,7 +165,7 @@ npm run build               # production bundle
 2. Build and run the images: `docker compose up --build -d`. The API docs (`/docs`) are disabled in production.
 3. Put a TLS-terminating reverse proxy (Caddy, Traefik, a cloud load balancer) in front of the `frontend` container.
    The bundled nginx forwards `/api/` to the API, so the browser uses a single origin.
-4. Keep Postgres, Redis and Flower off the public internet (the compose file binds them to `127.0.0.1`).
+4. Keep Postgres, Redis and Flower off the public internet (Postgres and Redis are not published by the compose file; Flower binds to `127.0.0.1`).
 5. Roll out upgrades with `docker compose pull && docker compose up --build -d`; migrations apply on boot. Take a
    `pg_dump` first.
 6. Optional: serve the frontend from a static host instead — build with `VITE_API_BASE_URL=https://api.example.com/api`
