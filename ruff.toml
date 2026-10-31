@@ -1,0 +1,17 @@
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv", "frontend", "db/migrations/versions"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["B008", "UP007", "UP045", "UP006", "UP035"]
+
+[lint.isort]
+lines-after-imports = 2
+
+[lint.per-file-ignores]
+"anti_bot/useragent_pool.py" = ["E501"]
+"tests/*" = ["E501"]
+"dashboard/*" = ["E501"]
+"dashboard/pages/*" = ["E501"]
+"scripts/*" = ["E501"]
