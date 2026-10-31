@@ -1,0 +1,94 @@
+# Secrets come from .env (copy .env.example). Nothing sensitive is hardcoded here.
+x-app: &app
+  build:
+    context: .
+  env_file:
+    - .env
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pricedb}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    <<: *app
+    # Apply migrations, then serve.
+    command: sh -c "alembic upgrade head && uvicorn api.main:app --host 0.0.0.0 --port 8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - app
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+  celery-worker:
+    <<: *app
+    command: celery -A scheduler.celery_app worker --loglevel=info
+    depends_on:
+      app:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    <<: *app
+    command: celery -A scheduler.celery_app beat --loglevel=info
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  flower:
+    <<: *app
+    command: celery -A scheduler.celery_app flower --port=5555 --basic-auth=${FLOWER_BASIC_AUTH:?Set FLOWER_BASIC_AUTH in .env}
+    depends_on:
+      - redis
+    ports:
+      - "127.0.0.1:5555:5555"
+
+  # Legacy Streamlit dashboard (optional): docker compose --profile legacy up
+  streamlit:
+    <<: *app
+    profiles: ["legacy"]
+    command: streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port 8501
+    depends_on:
+      - app
+    ports:
+      - "8501:8501"
+
+volumes:
+  postgres_data:
