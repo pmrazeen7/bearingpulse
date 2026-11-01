@@ -143,7 +143,7 @@
   z-index: 200;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  background: var(--accent);
+  background: var(--accent-fill);
   color: #000;
   font-weight: 600;
   transition: top var(--dur) ease;
@@ -257,7 +257,7 @@
   bottom: 9px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: var(--accent);
+  background: var(--accent-fill);
   animation: fade-in var(--dur) ease;
 }
 
@@ -626,5 +626,62 @@
   .table th,
   .table td {
     padding-inline: 12px;
+  }
+}
+
+/* ---------------------------------------------------------------- touch ergonomics */
+@media (pointer: coarse), (max-width: 640px) {
+  /* 44px targets with 8px between them (Apple HIG / WCAG 2.2 target size) */
+  .btn,
+  .input,
+  .select {
+    min-height: 44px;
+  }
+
+  .btn-sm {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .sidebar-brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .btn-icon {
+    min-width: 44px;
+  }
+
+  .nav-item {
+    height: 44px;
+  }
+
+  .segmented button {
+    height: 40px;
+    padding: 0 14px;
+  }
+
+  .pagination-controls {
+    gap: 10px;
+  }
+
+  .toolbar {
+    gap: 12px;
+  }
+
+  /* 16px prevents iOS from zooming the page when an input is focused */
+  .input,
+  .select {
+    font-size: 16px;
+  }
+
+  .table td,
+  .table th {
+    padding-block: 14px;
+  }
+
+  .legend-item {
+    min-height: 32px;
   }
 }

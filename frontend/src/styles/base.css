@@ -55,6 +55,16 @@ button {
   cursor: pointer;
 }
 
+/* removes the legacy 300ms tap delay and double-tap zoom on controls */
+button,
+a,
+input,
+select,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
+
 img,
 svg {
   display: block;

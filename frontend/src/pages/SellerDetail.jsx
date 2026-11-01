@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Crown, Package, Tag } from "lucide-react";
 
 import { PageHeader, StatCard } from "../components/StatCard";
-import { Badge, Card, EmptyState, ErrorState, SkeletonRows } from "../components/ui";
+import { Badge, Card, EmptyState, ErrorState, SkeletonRows, RowLink } from "../components/ui";
 import { formatCurrency, formatRelative } from "../lib/format";
 import { useApi } from "../lib/useApi";
 
@@ -37,7 +37,7 @@ export default function SellerDetail() {
             <thead><tr><th>Product</th><th className="align-right">Best price</th><th className="align-right">Snapshots</th><th>Last seen</th></tr></thead>
             <tbody>{asins.data.map((row) => (
               <tr key={row.asin} className="is-clickable" onClick={() => navigate(`/app/products/${row.asin}`)}>
-                <td><div className="table-title">{row.title || "Untitled listing"}</div><div className="table-sub"><span className="asin-chip">{row.asin}</span></div></td>
+                <td><RowLink to={`/app/products/${row.asin}`} className="table-title" title={row.title || undefined}>{row.title || "Untitled listing"}</RowLink><div className="table-sub"><span className="asin-chip">{row.asin}</span></div></td>
                 <td className="align-right num">{formatCurrency(row.best_price)}</td>
                 <td className="align-right num">{row.snapshot_count}</td>
                 <td className="muted">{formatRelative(row.last_seen)}</td>

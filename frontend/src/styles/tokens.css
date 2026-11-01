@@ -13,15 +13,19 @@
   --surface-hover: #1b1f25;
   --border: rgba(255, 255, 255, 0.07);
   --border-strong: rgba(255, 255, 255, 0.13);
+  --control-border: #6b7280; /* form-control boundary, 3:1+ (WCAG 1.4.11) */
   --ring: rgba(247, 164, 64, 0.45);
+  --scroll-shadow: rgba(0, 0, 0, 0.55);
 
   --text: #eceef1;
   --text-2: #a4aab4;
-  --text-3: #6d7480;
+  --text-3: #848b97; /* 4.5:1+ on every surface (was 3.4:1) */
   --text-inverse: #0a0b0d;
 
-  --accent: #f7a440;
+  --accent: #f7a440; /* text, icons, links */
   --accent-strong: #ffb85c;
+  --accent-fill: #f7a440; /* buttons, bars, graphics */
+  --accent-fill-strong: #ffb85c;
   --accent-soft: rgba(247, 164, 64, 0.12);
   --accent-glow: rgba(247, 164, 64, 0.28);
 
@@ -75,25 +79,29 @@
   --surface-hover: #f3f3ef;
   --border: rgba(17, 19, 23, 0.08);
   --border-strong: rgba(17, 19, 23, 0.15);
+  --control-border: #878d96;
   --ring: rgba(200, 120, 20, 0.4);
+  --scroll-shadow: rgba(17, 19, 23, 0.18);
 
   --text: #121417;
   --text-2: #4d535c;
-  --text-3: #858b94;
+  --text-3: #646a72;
   --text-inverse: #ffffff;
 
-  --accent: #d47a12;
-  --accent-strong: #b8670a;
+  --accent: #93550d;
+  --accent-strong: #7d4709;
+  --accent-fill: #d47a12;
+  --accent-fill-strong: #e08a22;
   --accent-soft: rgba(212, 122, 18, 0.1);
   --accent-glow: rgba(212, 122, 18, 0.2);
 
-  --success: #12a37a;
+  --success: #0a6e50;
   --success-soft: rgba(18, 163, 122, 0.1);
-  --danger: #d84a44;
+  --danger: #bb2d27;
   --danger-soft: rgba(216, 74, 68, 0.09);
-  --warning: #b8860b;
+  --warning: #825f08;
   --warning-soft: rgba(184, 134, 11, 0.1);
-  --info: #2f6fdb;
+  --info: #225fc5;
   --info-soft: rgba(47, 111, 219, 0.09);
 
   --chart-1: #d47a12;

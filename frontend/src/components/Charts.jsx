@@ -46,6 +46,7 @@ export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, t
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [hidden, setHidden] = useState(() => new Set());
   const [hover, setHover] = useState(null);
+  const [focused, setFocused] = useState(null); // legend hover/focus dims the other series
   const visible = series.filter((item) => !hidden.has(item.key) && item.points.length);
 
   const geometry = useMemo(() => {
@@ -105,8 +106,9 @@ export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, t
           height={height}
           role="img"
           aria-label={ariaLabel}
-          onMouseMove={onMove}
-          onMouseLeave={() => setHover(null)}
+          onPointerMove={onMove}
+          onPointerDown={onMove}
+          onPointerLeave={() => setHover(null)}
         >
           <g className="chart-grid">
             {geometry.ticks.map((tick) => (
@@ -138,7 +140,10 @@ export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, t
               .sx(item.points[0].x.getTime())
               .toFixed(1)},${PAD.top + geometry.innerH} Z`;
             return (
-              <g key={`${item.key}-${hidden.size}`}>
+              <g
+                key={`${item.key}-${hidden.size}`}
+                style={{ opacity: focused && focused !== item.key ? 0.16 : 1, transition: "opacity 160ms ease" }}
+              >
                 {index === 0 && !item.dashed && (
                   <>
                     <defs>
@@ -219,6 +224,10 @@ export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, t
               className="legend-item"
               aria-pressed={!hidden.has(item.key)}
               onClick={() => toggle(item.key)}
+              onPointerEnter={() => setFocused(item.key)}
+              onPointerLeave={() => setFocused(null)}
+              onFocus={() => setFocused(item.key)}
+              onBlur={() => setFocused(null)}
             >
               <span className="swatch" style={{ background: item.color }} />
               {item.label}
@@ -242,14 +251,14 @@ export function BarChart({ data, height = 180, color = "var(--chart-1)", format 
 
   return (
     <div className="chart" ref={ref}>
-      <svg width={width} height={height} role="img" aria-label={ariaLabel} onMouseLeave={() => setHover(null)}>
+      <svg width={width} height={height} role="img" aria-label={ariaLabel} onPointerLeave={() => setHover(null)}>
         <line className="chart-baseline" x1="0" x2={width} y1={pad.top + innerH} y2={pad.top + innerH} stroke="var(--border)" />
         {data.map((item, index) => {
           const h = item.value ? Math.max(3, (item.value / max) * innerH) : 2;
           const x = index * slot + (slot - barW) / 2;
           const active = hover === index;
           return (
-            <g key={item.label} onMouseEnter={() => setHover(index)}>
+            <g key={item.label} onPointerEnter={() => setHover(index)} onPointerDown={() => setHover(index)}>
               <rect x={index * slot} y={0} width={slot} height={height} fill="transparent" />
               <rect
                 className="chart-bar"
@@ -336,7 +345,7 @@ export function Donut({ segments, size = 168, thickness = 16, center }) {
 }
 
 /** Horizontal bar list rendered with HTML so labels wrap naturally. */
-export function BarList({ rows, format = (v) => v, color = "var(--accent)" }) {
+export function BarList({ rows, format = (v) => v, color = "var(--accent-fill)" }) {
   const max = Math.max(1, ...rows.map((row) => row.value));
   return (
     <ul className="bar-list">
@@ -354,7 +363,7 @@ export function BarList({ rows, format = (v) => v, color = "var(--accent)" }) {
   );
 }
 
-export function Sparkline({ values, width = 96, height = 28, color = "var(--accent)" }) {
+export function Sparkline({ values, width = 96, height = 28, color = "var(--accent-fill)" }) {
   if (!values?.length) return null;
   const max = Math.max(1, ...values);
   const step = values.length > 1 ? width / (values.length - 1) : width;

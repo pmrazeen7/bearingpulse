@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, ChevronLeft, ChevronRight, Info, RotateCw, Search, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { prefersReducedMotion } from "../lib/theme";
 import { Mascot } from "./Mascot";
@@ -14,6 +15,34 @@ export function Button({ variant = "secondary", size, icon: Icon, iconRight: Ico
       {children}
       {IconRight && <IconRight aria-hidden="true" />}
     </button>
+  );
+}
+
+// The focusable, screen-reader-visible way into a table row. The row itself is also clickable for
+// pointer users, so stop the click here to avoid navigating twice.
+export function RowLink({ to, children, className = "", ...props }) {
+  return (
+    <Link to={to} className={`row-link ${className}`} onClick={(event) => event.stopPropagation()} {...props}>
+      {children}
+    </Link>
+  );
+}
+
+// Where the latest price sits between the lowest and highest price ever seen.
+export function RangeBar({ value, min, max, format }) {
+  if (value == null || min == null || max == null) return <span className="subtle">—</span>;
+  const span = max - min;
+  const position = span > 0 ? Math.min(100, Math.max(0, ((value - min) / span) * 100)) : 50;
+  const where = span <= 0 ? "unchanged" : position <= 25 ? "near its lowest" : position >= 75 ? "near its highest" : "mid-range";
+  return (
+    <div className="range">
+      <div className="range-text num nowrap">
+        {format(min)} – {format(max)}
+      </div>
+      <div className="range-bar" role="img" aria-label={`Latest price is ${where}: ${format(value)} between ${format(min)} and ${format(max)}`}>
+        <span style={{ left: `${position}%` }} />
+      </div>
+    </div>
   );
 }
 

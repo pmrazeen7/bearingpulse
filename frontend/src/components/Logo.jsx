@@ -23,7 +23,7 @@ export function LogoMark({ size = 28, spinning = false, className = "" }) {
         ))}
       </g>
       <circle cx="16" cy="16" r="6.1" stroke="currentColor" strokeOpacity="0.9" strokeWidth="2.2" />
-      <circle className="logo-pulse" cx="16" cy="16" r="2.1" fill="var(--accent)" />
+      <circle className="logo-pulse" cx="16" cy="16" r="2.1" fill="var(--accent-fill)" />
     </svg>
   );
 }

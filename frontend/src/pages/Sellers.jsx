@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { PageHeader } from "../components/StatCard";
-import { Badge, Button, Card, EmptyState, ErrorState, Pagination, SearchInput, SkeletonRows } from "../components/ui";
+import { Badge, Button, Card, EmptyState, ErrorState, Pagination, SearchInput, SkeletonRows, RowLink } from "../components/ui";
 import { formatCurrency, formatRelative } from "../lib/format";
 import { useApi, useDebounced } from "../lib/useApi";
 
@@ -27,7 +27,7 @@ export default function Sellers() {
               <thead><tr><th>Seller</th><th className="hide-sm">Fulfilment</th><th className="align-right hide-sm">Products</th><th className="align-right">Buy Box wins</th><th className="align-right">Best price</th><th className="hide-sm">Last seen</th></tr></thead>
               <tbody>{data.map((row) => (
                 <tr key={row.seller_id} className="is-clickable" onClick={() => navigate(`/app/sellers/${row.seller_id}`)}>
-                  <td><div className="table-title">{row.seller_name}</div><div className="table-sub">{row.location_state || "Location unknown"}</div></td>
+                  <td><RowLink to={`/app/sellers/${row.seller_id}`} className="table-title" title={row.seller_name}>{row.seller_name}</RowLink><div className="table-sub">{row.location_state || "Location unknown"}</div></td>
                   <td className="hide-sm">{row.is_fba ? <Badge tone="info">FBA</Badge> : <Badge>Merchant</Badge>}</td>
                   <td className="align-right num hide-sm">{row.asin_count}</td>
                   <td className="align-right num">{row.buy_box_wins}</td>

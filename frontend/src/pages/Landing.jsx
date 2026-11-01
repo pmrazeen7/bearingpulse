@@ -147,8 +147,8 @@ function BearingVisual() {
               <stop offset="100%" stopColor="var(--hero-steel-lo)" />
             </radialGradient>
             <radialGradient id="core-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--accent-fill)" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="var(--accent-fill)" stopOpacity="0" />
             </radialGradient>
           </defs>
           <circle cx="200" cy="200" r="170" fill="none" stroke="url(#race)" strokeWidth="34" />
@@ -166,10 +166,10 @@ function BearingVisual() {
             <path d="M200 124 a76 76 0 0 1 64 36" fill="none" stroke="#fff" strokeOpacity="0.4" strokeWidth="3" strokeLinecap="round" />
           </g>
           <circle cx="200" cy="200" r="60" fill="url(#core-glow)" className="hero-core-glow" />
-          <circle cx="200" cy="200" r="9" fill="var(--accent)" className="hero-core" />
+          <circle cx="200" cy="200" r="9" fill="var(--accent-fill)" className="hero-core" />
         </svg>
         <svg className="hero-pulse-line" viewBox="0 0 400 400">
-          <path d="M70 200 H150 l12 -26 l16 52 l14 -40 l10 14 H330" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" pathLength="1" />
+          <path d="M70 200 H150 l12 -26 l16 52 l14 -40 l10 14 H330" fill="none" stroke="var(--accent-fill)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" pathLength="1" />
         </svg>
       </div>
       {SIGNALS.map((signal, index) => (

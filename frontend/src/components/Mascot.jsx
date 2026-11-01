@@ -80,8 +80,8 @@ export function Mascot({ mood = "idle", size = 120, title, className = "" }) {
         </g>
         {mood === "happy" && (
           <>
-            <ellipse cx="43" cy="70" rx="4" ry="2.4" fill="var(--accent)" opacity="0.35" />
-            <ellipse cx="77" cy="70" rx="4" ry="2.4" fill="var(--accent)" opacity="0.35" />
+            <ellipse cx="43" cy="70" rx="4" ry="2.4" fill="var(--accent-fill)" opacity="0.35" />
+            <ellipse cx="77" cy="70" rx="4" ry="2.4" fill="var(--accent-fill)" opacity="0.35" />
           </>
         )}
       </g>
@@ -92,7 +92,7 @@ export function Mascot({ mood = "idle", size = 120, title, className = "" }) {
         </g>
       )}
       {mood === "search" && (
-        <g className="pip-lens" fill="none" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round">
+        <g className="pip-lens" fill="none" stroke="var(--accent-fill)" strokeWidth="4" strokeLinecap="round">
           <circle cx="94" cy="92" r="11" fill="var(--surface)" fillOpacity="0.6" />
           <path d="M102 100 L112 110" />
         </g>

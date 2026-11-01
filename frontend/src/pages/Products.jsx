@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/StatCard";
 import { useToast } from "../components/Toast";
-import { Badge, Button, Card, EmptyState, ErrorState, Field, Pagination, SearchInput, SkeletonRows } from "../components/ui";
+import { Badge, Button, Card, EmptyState, ErrorState, Field, Pagination, SearchInput, SkeletonRows, RowLink, RangeBar } from "../components/ui";
 import { api } from "../lib/api";
 import { ASIN_PATTERN, STOCK, discountPct, formatCurrency, formatPercent, formatRelative } from "../lib/format";
 import { invalidate, useApi, useDebounced } from "../lib/useApi";
@@ -90,12 +90,12 @@ export default function Products() {
                     const off = discountPct(row.latest_price, row.latest_mrp);
                     return (
                       <tr key={row.asin} className="is-clickable" onClick={() => navigate(`/app/products/${row.asin}`)}>
-                        <td><div className="table-title">{row.title || "Untitled listing"}</div><div className="table-sub"><span className="asin-chip">{row.asin}</span> {row.search_query && <span>· {row.search_query}</span>}</div></td>
+                        <td><RowLink to={`/app/products/${row.asin}`} className="table-title" title={row.title || undefined}>{row.title || "Untitled listing"}</RowLink><div className="table-sub"><span className="asin-chip">{row.asin}</span> {row.search_query && <span>· {row.search_query}</span>}</div></td>
                         <td className="align-right"><div className="num"><strong>{formatCurrency(row.latest_price)}</strong></div>{off && <div className="table-sub"><Badge tone="success">{formatPercent(off, { digits: 0 })} off</Badge></div>}</td>
-                        <td className="align-right num muted hide-sm">{row.min_price !== null ? `${formatCurrency(row.min_price, { compact: true })} – ${formatCurrency(row.max_price, { compact: true })}` : "—"}</td>
+                        <td className="align-right hide-sm"><RangeBar value={row.latest_price} min={row.min_price} max={row.max_price} format={(v) => formatCurrency(v, { compact: true })} /></td>
                         <td className="hide-sm">{row.latest_seller || <span className="subtle">—</span>}</td>
                         <td>{stock ? <Badge tone={stock.tone} dot>{stock.label}</Badge> : <span className="subtle">—</span>}</td>
-                        <td className="muted hide-sm">{formatRelative(row.latest_scraped_at)}</td>
+                        <td className="muted nowrap hide-sm">{formatRelative(row.latest_scraped_at)}</td>
                       </tr>
                     );
                   })}
