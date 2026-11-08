@@ -29,7 +29,7 @@ export default function Overview() {
     <div className="page">
       <PageHeader
         title="Overview"
-        subtitle="Live view of your tracked bearing catalogue on Amazon India."
+        subtitle="Your tracked bearing listings on Amazon India."
         actions={<Button variant="primary" icon={Play} onClick={() => crawl("search")}>Discover products</Button>}
       />
 

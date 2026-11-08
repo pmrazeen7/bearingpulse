@@ -1,0 +1,283 @@
+/* Loaded last. Flat, document-like surfaces: hairline borders, small radii, no glow, no decorative motion. */
+
+body {
+  font-feature-settings: normal;
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.01em;
+}
+
+/* ---------------------------------------------------------------- motion: only what carries meaning */
+.page-enter {
+  animation: fade-in 140ms ease both;
+}
+
+.stagger > * {
+  animation: none;
+}
+
+.chart-line {
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  animation: none;
+}
+
+.chart-line-dashed,
+.chart-point,
+.donut-seg {
+  opacity: 1;
+  animation: none;
+}
+
+.chart-area {
+  display: none;
+}
+
+.chart-bar,
+.chart-hbar,
+.bar-list-fill {
+  animation: none;
+}
+
+.logo:hover .logo-cage,
+.logo-mark.is-spinning .logo-cage {
+  transform: none;
+  animation: none;
+}
+
+.logo-pulse {
+  animation: none;
+}
+
+.live-dot::after {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.btn:active:not(:disabled) {
+  transform: none;
+}
+
+.btn-primary {
+  --btn-bg: var(--accent-fill);
+  --btn-fg: var(--on-accent);
+  --btn-border: transparent;
+  box-shadow: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-fill-strong);
+  box-shadow: none;
+}
+
+.btn-arrow svg:last-child,
+.btn-arrow:hover svg:last-child {
+  transition: none;
+  transform: none;
+}
+
+.skip-link {
+  color: var(--on-accent);
+  background: var(--accent-fill);
+}
+
+/* ---------------------------------------------------------------- surfaces */
+.card {
+  box-shadow: none;
+  border-radius: var(--radius);
+}
+
+.card-interactive:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border-strong);
+}
+
+/* the four overview numbers read as one ruled strip, not four floating tiles */
+.grid-stats {
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--border);
+}
+
+.grid-stats > .stat.card {
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+}
+
+.stat::after,
+.stat-icon {
+  display: none;
+}
+
+.stat {
+  padding: 16px 20px;
+}
+
+.stat-top {
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.stat-value {
+  margin-top: 8px;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.badge {
+  height: 20px;
+  border-radius: var(--radius-xs);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- tables */
+.table th {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-3);
+}
+
+.table td {
+  padding-block: 11px;
+}
+
+/* ---------------------------------------------------------------- navigation */
+.sidebar {
+  background: var(--bg-elevated);
+}
+
+.nav-item {
+  height: 34px;
+  border-radius: var(--radius-sm);
+}
+
+.nav-item:hover svg {
+  transform: none;
+}
+
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.nav-item.active svg {
+  color: var(--accent);
+}
+
+.nav-item.active::before {
+  display: none;
+}
+
+.nav-badge {
+  border-radius: var(--radius-xs);
+  color: var(--signal);
+}
+
+.sidebar-card {
+  border-radius: var(--radius);
+}
+
+.topbar {
+  background: var(--bg);
+  backdrop-filter: none;
+}
+
+.health {
+  border-radius: var(--radius);
+}
+
+.page-title {
+  font-size: 22px;
+}
+
+.page-header {
+  align-items: flex-end;
+}
+
+/* ---------------------------------------------------------------- empty states: plain, left-aligned */
+.empty {
+  justify-items: start;
+  padding: 28px 24px;
+  text-align: left;
+  animation: none;
+}
+
+.empty-title {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.empty-text {
+  max-width: 480px;
+}
+
+.empty-actions {
+  justify-content: flex-start;
+}
+
+.empty-compact {
+  padding: 20px 20px;
+}
+
+/* ---------------------------------------------------------------- overlays */
+.modal {
+  border-radius: var(--radius-lg);
+  animation: fade-in var(--dur) ease both;
+}
+
+.modal-backdrop {
+  backdrop-filter: none;
+  background: rgba(10, 13, 18, 0.5);
+}
+
+.dropdown-menu {
+  animation: fade-in var(--dur-fast) ease both;
+  border-radius: var(--radius);
+}
+
+.toast {
+  border-radius: var(--radius);
+  animation: fade-in var(--dur) ease both;
+}
+
+.toast-progress {
+  display: none;
+}
+
+.job-card {
+  border-radius: var(--radius);
+  animation: fade-in var(--dur) ease both;
+}
+
+.chart-tooltip {
+  border-radius: var(--radius);
+}
+
+/* ---------------------------------------------------------------- price range bar: no gradient */
+.range-bar {
+  background: var(--surface-3);
+  box-shadow: none;
+}
+
+.range-bar span {
+  background: var(--accent-fill);
+}

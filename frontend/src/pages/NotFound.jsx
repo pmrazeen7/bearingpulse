@@ -14,7 +14,7 @@ export default function NotFound({ inApp = false }) {
         </Link>
       }
     >
-      We looked everywhere on the shelf, but this page doesn't exist.
+      This address doesn't match any page.
     </EmptyState>
   );
   return inApp ? <div className="page">{body}</div> : <div className="auth">{body}</div>;

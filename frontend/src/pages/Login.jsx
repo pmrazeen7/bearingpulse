@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, KeyRound } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
-import { Mascot } from "../components/Mascot";
+import { Logo } from "../components/Logo";
 import { Button, Field, Notice } from "../components/ui";
 import { useAuth } from "../lib/auth";
 
@@ -15,7 +15,6 @@ export default function Login() {
   const [reveal, setReveal] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [shake, setShake] = useState(false);
   const target = location.state?.from || "/app";
 
   useEffect(() => {
@@ -27,7 +26,7 @@ export default function Login() {
   const submit = async (event) => {
     event.preventDefault();
     if (!value.trim()) {
-      setError("Enter the API key configured as API_KEY on the server.");
+      setError("Enter the API key set as API_KEY on the server.");
       return;
     }
     setBusy(true);
@@ -36,9 +35,7 @@ export default function Login() {
       await signIn(value, { remember });
       navigate(target, { replace: true });
     } catch (err) {
-      setError(err.status === 401 ? "That API key was rejected by the server." : err.message);
-      setShake(true);
-      setTimeout(() => setShake(false), 450);
+      setError(err.status === 401 ? "The server rejected that API key." : err.message);
     } finally {
       setBusy(false);
     }
@@ -46,27 +43,21 @@ export default function Login() {
 
   return (
     <div className="auth">
-      <div className="landing-bg" aria-hidden="true">
-        <div className="landing-grid" />
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-      </div>
-      <div className={`auth-card ${shake ? "is-shaking" : ""}`}>
-        <div className="auth-mascot">
-          <Mascot mood={error ? "worried" : "idle"} size={96} />
-        </div>
-        <h1>Sign in to BearingPulse</h1>
-        <p className="auth-sub">Use the API key from your server's environment to open the dashboard.</p>
+      <div className="auth-card">
+        <Link to="/" aria-label="BearingPulse home" className="auth-logo">
+          <Logo />
+        </Link>
+        <h1>Sign in</h1>
+        <p className="auth-sub">Enter the API key from your server's .env file.</p>
         <form onSubmit={submit} noValidate>
-          {expired && !error && <Notice tone="warning">Your session expired or the key changed. Please sign in again.</Notice>}
+          {expired && !error && <Notice tone="warning">Your session ended or the key changed. Sign in again.</Notice>}
           {error && <Notice tone="danger">{error}</Notice>}
-          <Field label="API key" htmlFor="api-key" hint="Sent as the X-API-Key header on every request.">
+          <Field label="API key" htmlFor="api-key" hint="Sent as the X-API-Key header with every request.">
             <div className="input-group">
-              <KeyRound aria-hidden="true" />
               <input
                 id="api-key"
                 className="input"
-                style={{ paddingRight: 40 }}
+                style={{ paddingLeft: 12, paddingRight: 40 }}
                 type={reveal ? "text" : "password"}
                 autoComplete="off"
                 spellCheck={false}
@@ -74,7 +65,6 @@ export default function Login() {
                 value={value}
                 aria-invalid={Boolean(error)}
                 onChange={(event) => setValue(event.target.value)}
-                placeholder="Paste API key"
               />
               <button
                 type="button"
@@ -89,17 +79,12 @@ export default function Login() {
           </Field>
           <label className="checkbox">
             <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} />
-            Remember on this device
+            Keep me signed in on this device
           </label>
-          <Button type="submit" variant="primary" size="lg" loading={busy}>
+          <Button type="submit" variant="primary" loading={busy}>
             Sign in
           </Button>
         </form>
-        <div className="auth-foot">
-          <Link to="/" className="row" style={{ justifyContent: "center" }}>
-            <ArrowLeft size={14} /> Back to home
-          </Link>
-        </div>
       </div>
     </div>
   );

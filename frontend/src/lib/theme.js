@@ -9,7 +9,7 @@ function initialTheme() {
   } catch {
     // ignore
   }
-  return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return "light";
 }
 
 export function useTheme() {

@@ -9,6 +9,7 @@ import "./styles/layout.css";
 import "./styles/pages.css";
 import "./styles/jobs.css";
 import "./styles/landing.css";
+import "./styles/refine.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

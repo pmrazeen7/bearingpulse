@@ -54,7 +54,7 @@ const TITLES = [
 export const CRAWL_JOBS = [
   { job: "search", label: "Discover products", hint: "Search crawl for configured queries" },
   { job: "asin-detail", label: "Refresh product pages", hint: "Price, MRP, stock and Buy Box" },
-  { job: "seller-offers", label: "Sweep seller offers", hint: "All sellers across PIN codes" },
+  { job: "seller-offers", label: "Sweep seller offers", hint: "Not working: Amazon removed the offers page" },
   { job: "alert-check", label: "Run alert check", hint: "Evaluate thresholds now" },
 ];
 
@@ -96,7 +96,7 @@ export function useCrawl() {
       }
       const result = await api.post(`/crawl/${job}`);
       startJob({ taskId: result.task_id, job, label: meta.label });
-      toast.info(`${meta.label} queued`, "Track its progress in the panel at the bottom of the page.");
+      toast.info(`${meta.label} queued`, "Progress shows in the panel at the bottom of the page.");
       return result;
     } catch (error) {
       toast.error(`Could not start "${meta.label}"`, error.message);
