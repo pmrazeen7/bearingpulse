@@ -216,6 +216,21 @@ svg {
 .stagger > *:nth-child(6) { animation-delay: 250ms; }
 .stagger > *:nth-child(n + 7) { animation-delay: 300ms; }
 
+/* Scroll-triggered reveal (see components/Reveal.jsx) */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -230,4 +245,8 @@ svg {
     scroll-behavior: auto !important;
   }
 
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }

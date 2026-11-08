@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, ChevronLeft, ChevronRight, Info, RotateCw, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { prefersReducedMotion } from "../lib/theme";
+import { Mascot } from "./Mascot";
 
 export function Button({ variant = "secondary", size, icon: Icon, iconRight: IconRight, loading, className = "", children, ...props }) {
   const classes = ["btn", variant !== "secondary" && `btn-${variant}`, size && `btn-${size}`, !children && "btn-icon", className]
@@ -83,10 +85,10 @@ export function SkeletonRows({ rows = 6, columns = 5 }) {
   );
 }
 
-// `mood` is accepted for older call sites and ignored.
-export function EmptyState({ title, children, actions, compact = false }) {
+export function EmptyState({ mood = "sleepy", title, children, actions, compact = false }) {
   return (
     <div className={`empty ${compact ? "empty-compact" : ""}`}>
+      <Mascot mood={mood} size={compact ? 84 : 112} />
       <h3 className="empty-title">{title}</h3>
       {children && <p className="empty-text">{children}</p>}
       {actions && <div className="empty-actions">{actions}</div>}
@@ -189,10 +191,70 @@ export function Field({ label, hint, error, children, htmlFor }) {
   );
 }
 
-// Numbers render as they are. (Kept as a component so callers can pass a formatter.)
-export function AnimatedNumber({ value, format = (v) => Math.round(v).toLocaleString("en-IN") }) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
-  return format(Number(value));
+// Counts up to the target value when it first renders or changes.
+export function AnimatedNumber({ value, format = (v) => Math.round(v).toLocaleString("en-IN"), duration = 900 }) {
+  const [display, setDisplay] = useState(() => (prefersReducedMotion() ? value : 0));
+  const fromRef = useRef(0);
+
+  useEffect(() => {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return undefined;
+    if (prefersReducedMotion()) {
+      setDisplay(value);
+      return undefined;
+    }
+    const from = fromRef.current;
+    const start = performance.now();
+    let frame;
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(from + (value - from) * eased);
+      if (progress < 1) frame = requestAnimationFrame(tick);
+      else fromRef.current = value;
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value, duration]);
+
+  if (value === null || value === undefined) return "—";
+  return format(display);
+}
+
+// Adds .is-visible when the element scrolls into view.
+export function Reveal({ as: Tag = "div", delay = 0, className = "", children, ...props }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    if (!("IntersectionObserver" in window) || prefersReducedMotion()) {
+      setVisible(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Tag
+      ref={ref}
+      className={`reveal ${visible ? "is-visible" : ""} ${className}`}
+      style={{ "--reveal-delay": `${delay}ms` }}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
 }
 
 export function CloseButton({ onClick, label = "Close" }) {

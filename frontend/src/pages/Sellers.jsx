@@ -18,7 +18,7 @@ export default function Sellers() {
 
   return (
     <div className="page">
-      <PageHeader title="Sellers" subtitle="Sellers seen on your tracked listings." />
+      <PageHeader title="Sellers" subtitle="Every merchant seen competing on your tracked listings." />
       <Card flush>
         <div className="toolbar"><SearchInput value={query} onChange={setQuery} placeholder="Search seller name or ID" /></div>
         {error && !data ? <ErrorState error={error} onRetry={reload} /> : initialLoading ? <SkeletonRows rows={8} columns={5} /> : data?.length ? (
@@ -40,7 +40,7 @@ export default function Sellers() {
         ) : (
           <EmptyState mood={debounced ? "search" : "sleepy"} title={debounced ? "No matching sellers" : "No sellers yet"}
             actions={debounced && <Button onClick={() => setQuery("")}>Clear search</Button>}>
-            {debounced ? `Nothing matches "${debounced}".` : "Sellers appear after the first product refresh."}
+            {debounced ? `Nothing matches "${debounced}".` : "Sellers appear after the first product refresh or seller sweep."}
           </EmptyState>
         )}
       </Card>

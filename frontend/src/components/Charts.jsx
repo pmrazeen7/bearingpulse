@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 export const SERIES_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)", "var(--chart-6)"];
 
@@ -43,6 +43,7 @@ const PAD = { top: 12, right: 12, bottom: 26, left: 56 };
  */
 export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, tooltipTitle, ariaLabel }) {
   const [ref, width] = useWidth();
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [hidden, setHidden] = useState(() => new Set());
   const [hover, setHover] = useState(null);
   const [focused, setFocused] = useState(null); // legend hover/focus dims the other series
@@ -135,12 +136,26 @@ export function LineChart({ series, height = 280, yFormat = (v) => v, xFormat, t
             const d = item.points
               .map((point, i) => `${i ? "L" : "M"}${geometry.sx(point.x.getTime()).toFixed(1)},${geometry.sy(point.y).toFixed(1)}`)
               .join(" ");
+            const areaD = `${d} L${geometry.sx(item.points.at(-1).x.getTime()).toFixed(1)},${PAD.top + geometry.innerH} L${geometry
+              .sx(item.points[0].x.getTime())
+              .toFixed(1)},${PAD.top + geometry.innerH} Z`;
             return (
               <g
                 key={`${item.key}-${hidden.size}`}
                 style={{ opacity: focused && focused !== item.key ? 0.16 : 1, transition: "opacity 160ms ease" }}
               >
-                                <path
+                {index === 0 && !item.dashed && (
+                  <>
+                    <defs>
+                      <linearGradient id={`area-${uid}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={item.color} stopOpacity="0.22" />
+                        <stop offset="100%" stopColor={item.color} stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path className="chart-area" d={areaD} fill={`url(#area-${uid})`} />
+                  </>
+                )}
+                <path
                   className={item.dashed ? "chart-line-dashed" : "chart-line"}
                   d={d}
                   pathLength={item.dashed ? undefined : 1}
